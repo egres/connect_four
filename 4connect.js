@@ -78,6 +78,7 @@ function GameBoard(width, height) {
     for (var i = 0; i < width; i++) {
       this.board[i] = [];
     }
+    this.diagonals_with_indices = this.diagonals_indices();
 }
 
 GameBoard.prototype.playPiece = function(columnIndex, color) {
@@ -107,7 +108,7 @@ GameBoard.prototype.rows = function() {
     }, this);
     return rows;
 };
-GameBoard.prototype.diagonals = function() {
+GameBoard.prototype.diagonals_indices = function() {
     var lengthOfDiagonal = ( this.height < this.width ? this.height : this.width );
     var numOfDiagonals = lengthOfDiagonal - 3;
     var positiveSlopeDiagonalsTop = new Array(numOfDiagonals);
@@ -122,8 +123,8 @@ GameBoard.prototype.diagonals = function() {
                 if (diagonals[j] === undefined) {
                     diagonals[j] = [];
                 }
-                //diagonals[j].push({x:(i),y:(eval(arg2))});
-                diagonals[j].push(board[i][eval(arg2)]);
+                diagonals[j].push({x:(i),y:(eval(arg2))});
+                //diagonals[j].push(board[i][eval(arg2)]);
             }
         }
         return diagonals;
@@ -135,7 +136,14 @@ GameBoard.prototype.diagonals = function() {
     
     return positiveSlopeDiagonalsTop.concat(positiveSlopeDiagonalsBottom).concat(negativeSlopeDiaognalsTop).concat(negativeSlopeDiaognalsBottom);
 };
-
+GameBoard.prototype.diagonals = function() {
+    //var diagonals = new Array(this.height - 3);
+    return this.diagonals_with_indices.map(function(diagonal){
+        return diagonal.map(function(e){
+            return this.board[e.x][e.y];  
+        }, this);
+    }, this);
+};
 
 var game = new Game();
 game.updateView();
