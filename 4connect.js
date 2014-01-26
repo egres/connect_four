@@ -117,7 +117,8 @@ GameBoard.prototype.diagonals = function() {
         var numOfDiagonals = lengthOfDiagonal - 3;
         var diagonals = new Array(numOfDiagonals);
         for (var j = 0; j < numOfDiagonals; j++, lengthOfDiagonal--) {
-            for (var i = eval(arg1); i < lengthOfDiagonal + eval(arg1); i++) {
+            var evaledArg1 = eval(arg1);
+            for (var i = evaledArg1; i < lengthOfDiagonal + evaledArg1; i++) {
                 if (diagonals[j] === undefined) {
                     diagonals[j] = [];
                 }
