@@ -44,11 +44,24 @@ Game.prototype.makeMove = function(column, color) {
 Game.prototype.updateView = function() {
     var append_text = "";
     //console.log(this.gameboard.rows());
-    this.gameboard.rows().forEach(function(row) {
+    this.gameboard.rows().forEach(function(row, rowIndex) {
         var row_text = "";
         row_text += "<li>";       
         row.forEach(function(e, index) {
-            row_text += "<div column_index=" + index + " class='cell " + e + "'> </div>";    
+            var animationClass = "";
+            if (index===0&&rowIndex===0) {
+                //console.log("game.lastMove="+JSON.stringify(game.lastMove)+" index="+index+" rowIndex="+rowIndex);
+            }
+            
+            if (game.lastMove !== undefined && rowIndex === game.lastMove.y && index === game.lastMove.x) {
+                console.log("game.lastMove="+JSON.stringify(game.lastMove)+" index="+index+" rowIndex="+rowIndex);
+                animationClass = "slideDown ";
+            }
+            row_text += "<div class='outerCell'><div class='cellBackground'> </div>";    
+            row_text += "<div column_index=" + index + " class='cell " + animationClass + e + "'> </div></div>";    
+            
+            //row_text += "<div column_index=" + index + " class='cell slideDown " + e + "'> </div>";
+            
         });
         row_text += "</li>";
         append_text = row_text + append_text; //prepend the row
@@ -72,13 +85,14 @@ Game.prototype.updateView = function() {
 function GameBoard(width, height) {
     this.width = width;
     this.height = height;
-    //this.lastMove = { x:-1, y:-1 };
     
     this.board = new Array(width);
     for (var i = 0; i < width; i++) {
       this.board[i] = [];
     }
-    this.diagonals_with_indices = this.diagonals_indices();
+    //initialize the diagonals collection with indices object literals, i.e. {x:1, y:2}
+    //overwriting the diagonals_indices property makes sure that this expensive method is not called again
+    this.diagonals_indices = this.diagonals_indices();
 }
 
 GameBoard.prototype.playPiece = function(columnIndex, color) {
@@ -90,7 +104,7 @@ GameBoard.prototype.playPiece = function(columnIndex, color) {
     }
     var yIndex = this.board[columnIndex].push(color) - 1;
     //console.log(this.board);
-    return { x:columnIndex, y:yIndex , color:color}; //coordinates of the last play   
+    return { x:parseInt(columnIndex), y:yIndex , color:color}; //coordinates of the last play   
 };
 
 GameBoard.prototype.columns = function() {
@@ -110,10 +124,9 @@ GameBoard.prototype.rows = function() {
 };
 GameBoard.prototype.diagonals_indices = function() {
     var lengthOfDiagonal = ( this.height < this.width ? this.height : this.width );
-    var numOfDiagonals = lengthOfDiagonal - 3;
-    var positiveSlopeDiagonalsTop = new Array(numOfDiagonals);
-    var positiveSlopeDiagonalsBottom = new Array(numOfDiagonals);
     
+    //reduce code redundancy when calculating four diagonals arrays
+    //the outer function is called only once on gameboard initialization so it's safe to use from performance pov
     function partialDiagonals(lengthOfDiagonal, board, arg1, arg2) {
         var numOfDiagonals = lengthOfDiagonal - 3;
         var diagonals = new Array(numOfDiagonals);
@@ -123,22 +136,25 @@ GameBoard.prototype.diagonals_indices = function() {
                 if (diagonals[j] === undefined) {
                     diagonals[j] = [];
                 }
-                diagonals[j].push({x:(i),y:(eval(arg2))});
-                //diagonals[j].push(board[i][eval(arg2)]);
+                diagonals[j].push({ x:(i), y:(eval(arg2)) });
             }
         }
         return diagonals;
     }
-    positiveSlopeDiagonalsTop = partialDiagonals(lengthOfDiagonal, this.board, "0", "i+j");
-    positiveSlopeDiagonalsBottom = partialDiagonals(lengthOfDiagonal, this.board, "j+1", "i-j-1");  
-    negativeSlopeDiaognalsTop = partialDiagonals(lengthOfDiagonal, this.board, "j+1", "6-i+j");
-    negativeSlopeDiaognalsBottom = partialDiagonals(lengthOfDiagonal, this.board, "0", "5-i-j");
     
-    return positiveSlopeDiagonalsTop.concat(positiveSlopeDiagonalsBottom).concat(negativeSlopeDiaognalsTop).concat(negativeSlopeDiaognalsBottom);
+    var positiveSlopeDiagonalsTop = partialDiagonals(lengthOfDiagonal, this.board, "0", "i+j");
+    var positiveSlopeDiagonalsBottom = partialDiagonals(lengthOfDiagonal, this.board, "j+1", "i-j-1");  
+    var negativeSlopeDiaognalsTop = partialDiagonals(lengthOfDiagonal, this.board, "j+1", "6-i+j");
+    var negativeSlopeDiaognalsBottom = partialDiagonals(lengthOfDiagonal, this.board, "0", "5-i-j");
+    
+    return positiveSlopeDiagonalsTop
+            .concat(positiveSlopeDiagonalsBottom)
+            .concat(negativeSlopeDiaognalsTop)
+            .concat(negativeSlopeDiaognalsBottom);
 };
 GameBoard.prototype.diagonals = function() {
     //var diagonals = new Array(this.height - 3);
-    return this.diagonals_with_indices.map(function(diagonal){
+    return this.diagonals_indices.map(function(diagonal){
         return diagonal.map(function(e){
             return this.board[e.x][e.y];  
         }, this);

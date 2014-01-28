@@ -26,4 +26,75 @@ ul#board div.yellow {
 ul#board div.red {
   background-color: red;
 }
+.slideDown {
+	animation-name: slideDown;
+	-webkit-animation-name: slideDown;	
 
+	animation-duration: 1s;	
+	-webkit-animation-duration: 1s;
+
+	animation-timing-function: ease;	
+	-webkit-animation-timing-function: ease;	
+
+	visibility: visible !important;						
+}
+.outerCell {
+  position: relative;
+  width: 100px;
+  height: 50px;
+}
+.cell {
+  position: absolute;
+  z-index: 2;
+  top:-5px;
+  left:-5px;
+  
+}
+.cellBackground {
+  position: absolute;
+  z-index: 1;
+  top:-5px;
+  left:-5px;
+}
+
+@keyframes slideDown {
+	0% {
+		transform: translateY(-700%);
+	}
+	50%{
+		transform: translateY(8%);
+	}
+	65%{
+		transform: translateY(-4%);
+	}
+	80%{
+		transform: translateY(4%);
+	}
+	95%{
+		transform: translateY(-2%);
+	}			
+	100% {
+		transform: translateY(0%);
+	}		
+}
+
+@-webkit-keyframes slideDown {
+	0% {
+		-webkit-transform: translateY(-700%);
+	}
+	50%{
+		-webkit-transform: translateY(8%);
+	}
+	65%{
+		-webkit-transform: translateY(-4%);
+	}
+	80%{
+		-webkit-transform: translateY(4%);
+	}
+	95%{
+		-webkit-transform: translateY(-2%);
+	}			
+	100% {
+		-webkit-transform: translateY(0%);
+	}	
+}
